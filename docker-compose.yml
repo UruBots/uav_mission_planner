@@ -1,0 +1,13 @@
+services:
+  mission_planner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mission_planner
+    container_name: mission_planner
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+    env_file:
+      - .env
+    command: roslaunch mrs_uav_gazebo_simulation simulation.launch world_name:=grass_plane gui:=true
