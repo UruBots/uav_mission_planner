@@ -21,13 +21,13 @@ def call_set_mode(mode, mode_ID):
         print('Service call failed: %s' % e)
 
 def pub_reset_gps():
-    rospy.wait_for_service("/mavros/global_position/set_gp_origin")
-    try:
-        msg = GeoPointStamped()
-        reset_gps = rospy.Publisher("/mavros/global_position/set_gp_origin", GeoPointStamped, queue_size=10)
-        reset_gps.publish(msg)
-    except rospy.ServiceException as e:
-        print('Service call failed: %s' % e)
+    for i in range (0,5):
+     try:
+         msg = GeoPointStamped()
+         reset_gps = rospy.Publisher("/mavros/global_position/set_gp_origin", GeoPointStamped, queue_size=10)
+         reset_gps.publish(msg)
+     except rospy.ServiceException as e:
+         print('Service call failed: %s' % e)
 
 # TODO change to call_set_mode
 #http://wiki.ros.org/mavros/CustomModes for custom modes
@@ -83,7 +83,7 @@ def setTakeoffMode():
     rospy.wait_for_service('/mavros/cmd/takeoff')
     try:
         takeoffService = rospy.ServiceProxy('/mavros/cmd/takeoff', mavros_msgs.srv.CommandTOL) 
-        takeoffService(altitude = 1, latitude = 0, longitude = 0, min_pitch = 0, yaw = 0)
+        takeoffService(altitude = 0.5, latitude = 0, longitude = 0, min_pitch = 0, yaw = 0)
     except rospy.ServiceException as e:
         print("Service takeoff call failed: %s" % e)
 
@@ -108,22 +108,6 @@ def set_target_position(x,y,z,w):
     except rospy.ServiceException as e:
         print("Service set_target_position call failed: %s" % e)
 
-def pub_reset_gps():
-    msg = GeoPointStamped()
-    try:
-        reset_gps = rospy.Publisher("/mavros/global_position/set_gp_origin", GeoPointStamped, queue_size=10)
-        reset_gps.publish(msg)
-    except rospy.ServiceException as e:
-        print("Service reset_gps call failed: %s" % e)
-
-def pub_reset_gps():
-    msg = GeoPointStamped()
-    try:
-        reset_gps = rospy.Publisher("/mavros/global_position/set_gp_origin", GeoPointStamped, queue_size=10)
-        reset_gps.publish(msg)
-    except rospy.ServiceException as e:
-        print("Service reset_gps call failed: %s" % e)
-
 def go_to_destination(dest = "2.8, 0.0, 2.0, 1.0"):
     x, y, z, w = dest.split(",")
     setGuidedMode()
@@ -143,23 +127,26 @@ def go_to_destination(dest = "2.8, 0.0, 2.0, 1.0"):
     setDisarm()
 
 def read_qr_and_go_to_destination():
-    setGuidedMode()
     time.sleep(1)
-    pub_reset_gps()
+    setGuidedMode()
+    print("Setou")
     time.sleep(1)
     rospy.set_param("/mavros/vision_pose/tf/listen", True)
+    time.sleep(1)
+    pub_reset_gps()
+    pub_reset_gps()
+    print("Fake gps")
     time.sleep(5)
     setArm()
     time.sleep(1)
-    setTakeoffMode()
-    time.sleep(15)
-    # read qr codes with node.
-    setTakeoffMode()
+    setArm()
+    print("armou")
     time.sleep(1)
-    setDisarm()
-
-    
-
+    setTakeoffMode()
+    print("take off")
+    time.sleep(5)
+    # read qr codes with node.
+    setLandMode()
 
 def menu():
     print("Press")
@@ -206,14 +193,6 @@ def myLoop():
             pub_reset_gps()
         else: 
             print("Exit")
-
-def state_callback(data):
-    rospy.rospy.loginfo("info Mode: %s" %data.mode)
-    if data.mode == "MANUAL":
-        #TODO review functionality
-        rospy.loginfo("Control connected!!!")
-    else:
-        myLoop()
 
 
 if __name__ == '__main__':
