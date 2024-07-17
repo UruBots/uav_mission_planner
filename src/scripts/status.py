@@ -1,4 +1,5 @@
 class Status(object):
+	NotInited = -1
 	Emergency = 0
 	Inited    = 1
 	Landed    = 2
