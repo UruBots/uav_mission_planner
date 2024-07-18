@@ -95,7 +95,7 @@ class MavrosController(object):
         #print ("longitude: %.7f" %longitude)
         #print ("latitude: %.7f" %latitude)
 
-    def set_target_position(x,y,z,w):
+    def set_target_position(self, x, y, z, w):
         pose = PoseStamped()
         pose.pose.position.x = x
         pose.pose.position.y = y
