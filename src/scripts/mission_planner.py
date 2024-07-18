@@ -50,7 +50,7 @@ class MissionController(object):
 
 
 	def task_two(self):
-
+		return 0
 
 if __name__=='__main__':
 	auto_drive = MissionController()
