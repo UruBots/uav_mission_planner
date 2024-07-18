@@ -52,7 +52,7 @@ class MissionController(object):
 				except:
 					message = None
 				print("QR message: ", message)
-				position = rospy.wait_for_message('/mavros/raw', String, timeout=5)
+				# position = rospy.wait_for_message('/mavros/raw', String, timeout=5)
 			else:
 				pass
 		# land drone
