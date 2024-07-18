@@ -12,7 +12,7 @@ class QrDetector(object):
         rospy.init_node('camera_reader', anonymous=False)
         self.bridge = CvBridge()
         self.subscription_0 = rospy.Subscriber('/camera_0', Image, self.callback)
-        self.subscription_1 = rospy.Subscriber('/camera_1', Image, self.callback)
+        # self.subscription_1 = rospy.Subscriber('/camera_1', Image, self.callback)
         self.image_pub = rospy.Publisher('/camera_1/qrcode', Image, queue_size=10)
         self.qr_to_move = rospy.Publisher('/qrcode/raw', String, queue_size=10)
         self.status = Status.NotInited
@@ -21,6 +21,7 @@ class QrDetector(object):
         self.status = status
         
     def qr_detected(self):
+        return self.status == Status.Flying
         
     def callback(self, data):
         try:
