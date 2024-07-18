@@ -15,9 +15,11 @@ class MissionController(object):
 		# self.detector = ObjectDetector()
 		self.controller = MavrosController()
 		# self.line_follower = LineFollower()
-		self.status = Status.NotInited # drone status , 0 flying, -1 landed
-		# ODOMETRIA
+  		# drone status -1 notinited , 1 inited, 2 landed, 3 flying
+		self.status = Status.NotInited
+  		# Parameters
 		self.type = rospy.get_param('type', 1)
+		# ODOMETRY
 
 	def drive(self):
 		print("start mission")
@@ -41,7 +43,7 @@ class MissionController(object):
 				self.controller.set_status = self.status
 			elif self.status == Status.Inited:
 				print("send go foward")
-				self.controller.set_target_position(x = 0.5, y = 0, z = 0, w = 0)
+				# self.controller.set_target_position(x = 0.5, y = 0, z = 0, w = 0)
 				self.status = Status.Flying
 			elif self.status == Status.Flying:
 				# qr code
@@ -50,6 +52,7 @@ class MissionController(object):
 				except:
 					message = None
 				print("QR message: ", message)
+				position = rospy.wait_for_message('/mavros/raw', String, timeout=5)
 			else:
 				pass
 		# land drone

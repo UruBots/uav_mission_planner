@@ -46,7 +46,7 @@ class QrDetector(object):
             text = "{}".format(qr_data)
             cv2.putText(resized_image, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             self.qr_to_move.publish(qr_data)
-        cv2.imshow("Camera output", resized_image)
+        # cv2.imshow("Camera output", resized_image)
         cv2.waitKey(5)
 
 def main():
