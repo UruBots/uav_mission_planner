@@ -118,18 +118,28 @@ class MavrosController(object):
     # TODO status is not being used
     # utils functions
     def fly_drone(self):
+        print("setGuidedMode")
         self.setGuidedMode()
         time.sleep(1)
+        print("pub_reset_gps")
         self.pub_reset_gps()
         time.sleep(1)
         rospy.set_param("/mavros/vision_pose/tf/listen", True)
         time.sleep(5)
+        print("setArm 1")
         self.setArm()
         time.sleep(1)
+        print("setArm 2")
+        self.setArm()
+        time.sleep(1)
+        print("setTakeoffMode")
         self.setTakeoffMode()
         
     def land_drone(self):
+        print("setLandMode")
         self.setLandMode()
+        print("setDisarm")
         self.setDisarm()
+        print("setStabilizeMode")
         self.setStabilizeMode()
         self.status = Status.Landed
