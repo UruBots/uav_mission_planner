@@ -11,18 +11,20 @@ from std_msgs.msg import String
 class MissionController(object):
 	def __init__(self):
 		rospy.init_node('mission_controller', anonymous=True)
-		self.qr_detector = QrDetector()
-		self.detector = ObjectDetector()
+		# self.qr_detector = QrDetector()
+		# self.detector = ObjectDetector()
 		self.controller = MavrosController()
-		self.line_follower = LineFollower()
+		# self.line_follower = LineFollower()
 		self.status = Status.NotInited # drone status , 0 flying, -1 landed
 		# ODOMETRIA
+		self.type = rospy.get_param('type', 1)
 
-  
-	def drive(self, option):
-		if option == 1:
+	def drive(self):
+		print("start mission")
+		print("type: ", self.type)
+		if self.type == 1:
 			self.task()
-		elif option == 2:
+		elif self.type == 2:
 			self.task_two()
 		else:
 			pass
@@ -42,7 +44,7 @@ class MissionController(object):
 				self.controller.set_target_position(x = 0.5, y = 0, z = 0, w = 0)
 				self.status = Status.Flying
 			elif self.status == Status.Flying:
-				# qr code		
+				# qr code
 				print(rospy.wait_for_message('/qrcode/raw', String, timeout=5))
 			else:
 				pass
