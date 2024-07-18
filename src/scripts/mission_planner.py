@@ -36,7 +36,7 @@ class MissionController(object):
 			rate.sleep()
 			if self.status == Status.NotInited:
 				print("send take off")
-				self.controller.start_drone()
+				self.controller.fly_drone()
 				self.status = 1
 				self.controller.set_status = self.status
 			elif self.status == Status.Inited:
@@ -52,7 +52,8 @@ class MissionController(object):
 				print("QR message: ", message)
 			else:
 				pass
-		self.controller.Land()
+		# land drone
+		self.controller.land_drone()
 
 
 	def task_two(self):

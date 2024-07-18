@@ -117,7 +117,7 @@ class MavrosController(object):
             
     # TODO status is not being used
     # utils functions
-    def start_drone(self):
+    def fly_drone(self):
         self.setGuidedMode()
         time.sleep(1)
         self.pub_reset_gps()
@@ -128,7 +128,7 @@ class MavrosController(object):
         time.sleep(1)
         self.setTakeoffMode()
         
-    def end_drone(self):
+    def land_drone(self):
         self.setLandMode()
         self.setDisarm()
         self.setStabilizeMode()
