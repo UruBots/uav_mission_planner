@@ -3,12 +3,13 @@
 import rospy
 from std_msgs.msg import *
 from geometry_msgs.msg import PoseStamped
-
+from status import Status
 class QRtoMove:
     def __init__(self):
         rospy.init_node('qr_to_move', anonymous=False)
         self.subscription = rospy.Subscriber('/qrcode/raw', String, self.callback)
         self.set_position = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
+        self.status = Status.NotInited # drone status , 0 flying, -1 landed
 
 
     def callback(self, data):

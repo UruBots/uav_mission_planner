@@ -6,28 +6,32 @@ from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 from pyzbar.pyzbar import decode
-
-class CameraReader:
-
+from status import Status
+class QrDetector(object):
     def __init__(self):
-        rospy.init_node('camera_read', anonymous=False)
+        rospy.init_node('camera_reader', anonymous=False)
         self.bridge = CvBridge()
-        self.subscription = rospy.Subscriber('/camera_1', Image, self.callback)
+        self.subscription_0 = rospy.Subscriber('/camera_0', Image, self.callback)
+        self.subscription_1 = rospy.Subscriber('/camera_1', Image, self.callback)
         self.image_pub = rospy.Publisher('/camera_1/qrcode', Image, queue_size=10)
         self.qr_to_move = rospy.Publisher('/qrcode/raw', String, queue_size=10)
-
+        self.status = Status.NotInited
+        
+    def set_status(self, status):
+        self.status = status
+        
+    def qr_detected(self):
+        
     def callback(self, data):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
         except CvBridgeError as e:
             rospy.logerr(e)
             return
-
         (rows, cols, channels) = cv_image.shape
 
         # TODO resize image based on the camera
         resized_image = cv2.resize(cv_image, (480, 640))
-
         # gray = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
         # _, img_bw = cv2.threshold(gray, 40, 255, cv2.THRESH_BINARY)
 
@@ -45,7 +49,7 @@ class CameraReader:
         cv2.waitKey(5)
 
 def main():
-    cr = CameraReader()
+    cr = QrDetector()
     try:
         rospy.spin()
     except KeyboardInterrupt:

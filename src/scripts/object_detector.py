@@ -4,7 +4,8 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
-
+from qr_to_move import QRtoMove
+from status import Status
 class ObjectDetector:
     def __init__(self):
         # Initialize the node
@@ -12,6 +13,8 @@ class ObjectDetector:
         # Create a CvBridge to convert ROS image messages to OpenCV images
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.image_callback)
+        self.to_move = QRtoMove()
+        self.status = Status.NotInited # drone status , 0 flying, -1 landed
 
     # This function converts ROS image messages to OpenCV images
     def imgmsg_to_cv2(self, img_msg):
@@ -69,8 +72,8 @@ class ObjectDetector:
             contours = self.process_image(cv_image)
             shape_contours = self.detect_shapes(contours)
             self.draw_shapes(cv_image, shape_contours)
-            cv2.imshow("Image Window", cv_image)
-            cv2.waitKey(3)
+            #cv2.imshow("Image Window", cv_image)
+            #cv2.waitKey(3)
 
 def main():
     try:
