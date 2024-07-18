@@ -16,8 +16,8 @@ longitude = 0.0
 
 class MavrosController(object):
     def __init__(self):
-	    self.status = Status.NotInited
-     
+        self.status = Status.NotInited
+
     def set_status(self, status):
         self.status = status
 
@@ -31,7 +31,7 @@ class MavrosController(object):
 
     # TODO change to call_set_mode
     #http://wiki.ros.org/mavros/CustomModes for custom modes
-    def setGuidedMode():
+    def setGuidedMode(self):
         rospy.wait_for_service('/mavros/set_mode')
         try:
             flightModeService = rospy.ServiceProxy('/mavros/set_mode', mavros_msgs.srv.SetMode)
@@ -40,7 +40,7 @@ class MavrosController(object):
             print("service set_mode call failed: %s. GUIDED Mode could not be set. Check that GPS is enabled" % e)
 
     # TODO change to call_set_mode
-    def setStabilizeMode():
+    def setStabilizeMode(self):
         rospy.wait_for_service('/mavros/set_mode')
         try:
             flightModeService = rospy.ServiceProxy('/mavros/set_mode', mavros_msgs.srv.SetMode)
@@ -48,7 +48,7 @@ class MavrosController(object):
         except rospy.ServiceException as e:
             print("service set_mode call failed: %s. GUIDED Mode could not be set. Check that GPS is enabled" % e)
 
-    def setLandMode():
+    def setLandMode(self):
         rospy.wait_for_service('/mavros/cmd/land')
         try:
             landService = rospy.ServiceProxy('/mavros/cmd/land', mavros_msgs.srv.CommandTOL)
@@ -70,7 +70,7 @@ class MavrosController(object):
         except rospy.ServiceException as e:
             print("Service arm call failed: %s"%e)
             
-    def setDisarm():
+    def setDisarm(self):
         rospy.wait_for_service('/mavros/cmd/arming')
         try:
             armService = rospy.ServiceProxy('/mavros/cmd/arming', mavros_msgs.srv.CommandBool)
@@ -79,7 +79,7 @@ class MavrosController(object):
             print("Service arm call failed: %s"%e)
 
 
-    def setTakeoffMode():
+    def setTakeoffMode(self):
         rospy.wait_for_service('/mavros/cmd/takeoff')
         try:
             takeoffService = rospy.ServiceProxy('/mavros/cmd/takeoff', mavros_msgs.srv.CommandTOL) 
@@ -107,7 +107,7 @@ class MavrosController(object):
         except rospy.ServiceException as e:
             print("Service set_target_position call failed: %s" % e)
 
-    def pub_reset_gps():
+    def pub_reset_gps(self):
         msg = GeoPointStamped()
         try:
             reset_gps = rospy.Publisher("/mavros/global_position/set_gp_origin", GeoPointStamped, queue_size=10)
