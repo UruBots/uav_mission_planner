@@ -9,13 +9,13 @@ from line_follower import LineFollower
 from std_msgs.msg import String
 
 class MissionController(object):
-    def __init__(self):
-	    rospy.init_node('mission_controller', anonymous=True)
+	def __init__(self):
+		rospy.init_node('mission_controller', anonymous=True)
 		self.qr_detector = QrDetector()
-  		self.detector = ObjectDetector()
-        self.controller = MavrosController()
-        self.line_follower = LineFollower()
-        self.status = Status.NotInited # drone status , 0 flying, -1 landed
+		self.detector = ObjectDetector()
+		self.controller = MavrosController()
+		self.line_follower = LineFollower()
+		self.status = Status.NotInited # drone status , 0 flying, -1 landed
 		# ODOMETRIA
 
   
