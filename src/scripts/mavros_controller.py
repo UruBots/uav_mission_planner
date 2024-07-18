@@ -134,6 +134,7 @@ class MavrosController(object):
         time.sleep(1)
         print("setTakeoffMode")
         self.setTakeoffMode()
+        time.sleep(5)
         
     def land_drone(self):
         print("setLandMode")
