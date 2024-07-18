@@ -9,7 +9,7 @@ class ImagePublisher:
     def __init__(self):
         rospy.init_node('image_publisher', anonymous=True)
         self.bridge = CvBridge()
-        self.camera1 = rospy.Subscriber("/zed/zed_node/left/image_rect_color", Image)
+        self.camera1 = rospy.Subscriber("/zed/zed_node/left/image_rect_color", Image, self.callbackZed)
         self.camera0 = cv2.VideoCapture(0)
         self.pub_cam0 = rospy.Publisher('/camera_0/rgb', Image, queue_size=10)
         self.pub_cam1 = rospy.Publisher('/camera_1/rgb', Image, queue_size=10)
@@ -33,14 +33,14 @@ class ImagePublisher:
         while not rospy.is_shutdown():
             try:
                 r, frame = self.camera0.read()
-                z, frame_zed = self.camera1.read()
+                # z, frame_zed = self.camera1.read()
                 if not r:
                     return
                 self.camera0.publish(self.bridge.cv2_to_imgmsg(frame, "bgr8"))
 
-                if not z:
-                    return
-                self.camera1.publish(self.bridge.cv2_to_imgmsg(frame_zed, "bgr8"))
+                # if not z:
+                #     return
+                # self.camera1.publish(self.bridge.cv2_to_imgmsg(frame_zed, "bgr8"))
                 
                 # # BGR8
                 # self.bgr8pub.publish(self.bridge.cv2_to_imgmsg(frame, "bgr8"))
