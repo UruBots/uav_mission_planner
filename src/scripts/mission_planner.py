@@ -53,6 +53,7 @@ class MissionController(object):
 			else:
 				pass
 		# land drone
+		print("send land")
 		self.controller.land_drone()
 
 
