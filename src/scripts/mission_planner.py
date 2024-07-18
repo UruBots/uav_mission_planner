@@ -45,7 +45,11 @@ class MissionController(object):
 				self.status = Status.Flying
 			elif self.status == Status.Flying:
 				# qr code
-				print(rospy.wait_for_message('/qrcode/raw', String, timeout=5))
+				try:
+					message = rospy.wait_for_message('/qrcode/raw', String, timeout=5)
+				except:
+					message = None
+				print("QR message: ", message)
 			else:
 				pass
 		self.controller.Land()
