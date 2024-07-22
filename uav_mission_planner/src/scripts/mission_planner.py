@@ -8,18 +8,19 @@ from qr_code_detector import QrDetector
 from line_follower import LineFollower
 from std_msgs.msg import String
 
+QR_count = 9
+
 class MissionController(object):
 	def __init__(self):
 		rospy.init_node('mission_controller', anonymous=True)
-		# self.qr_detector = QrDetector()
-		# self.detector = ObjectDetector()
 		self.controller = MavrosController()
-		# self.line_follower = LineFollower()
   		# drone status -1 notinited , 1 inited, 2 landed, 3 flying
 		self.status = Status.NotInited
   		# Parameters
 		self.type = rospy.get_param('type', 1)
-		# ODOMETRY
+		# utils
+		self.qr_reader = None
+		self.qr_count = 0
 
 	def drive(self):
 		print("start mission")
@@ -30,7 +31,8 @@ class MissionController(object):
 			self.task_two()
 		else:
 			pass
-    
+
+    # Game Structure
 	def task(self):
 		while not rospy.is_shutdown():
         	# sleep 1 second to wait the drone initial
@@ -46,20 +48,20 @@ class MissionController(object):
 				# self.controller.set_target_position(x = 0.5, y = 0, z = 0, w = 0)
 				self.status = Status.Flying
 			elif self.status == Status.Flying:
+				# TODO ACTIONS
 				# qr code
 				try:
-					message = rospy.wait_for_message('/qrcode/raw', String, timeout=5)
+					message = rospy.wait_for_message('/qrcode/raw', String, timeout=10)
 				except:
 					message = None
 				print("QR message: ", message)
-				# position = rospy.wait_for_message('/mavros/raw', String, timeout=5)
 			else:
 				pass
 		# land drone
 		print("send land")
 		self.controller.land_drone()
 
-
+	# Field of PLay
 	def task_two(self):
 		return 0
 

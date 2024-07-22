@@ -10,4 +10,8 @@ services:
       - ~/.Xauthority:/root/.Xauthority
     env_file:
       - .env
-    command: roslaunch mrs_uav_gazebo_simulation simulation.launch world_name:=grass_plane gui:=true
+    environment:
+      - DISPLAY=$DISPLAY
+      - LIBGL_ALWAYS_SOFTWARE=1 
+    # command: roslaunch mrs_uav_gazebo_simulation simulation.launch world_name:=grass_plane gui:=true
+    # command: tail -f /dev/null

@@ -1,6 +1,4 @@
-
-
-import time
+# import time
 import rospy
 from std_msgs.msg import *
 from sensor_msgs.msg import *
@@ -58,7 +56,8 @@ class MavrosController(object):
             
     def setArm(self):
         self.pub_reset_gps()
-        time.sleep(1)
+        # time.sleep(1)
+        rospy.Rate(1).sleep()
         rospy.wait_for_service('/mavros/cmd/arming')
         try:
             # TODO this is to verify why the drone is arming but not launching
@@ -120,21 +119,28 @@ class MavrosController(object):
     def fly_drone(self):
         print("setGuidedMode")
         self.setGuidedMode()
-        time.sleep(1)
+        # time.sleep(1)
+        rospy.Rate(1).sleep()
         print("pub_reset_gps")
         self.pub_reset_gps()
-        time.sleep(1)
+        # time.sleep(1)
+        rospy.Rate(1).sleep()
         rospy.set_param("/mavros/vision_pose/tf/listen", True)
-        time.sleep(5)
+        # time.sleep(5)
+        rospy.Rate(5).sleep()
         print("setArm 1")
         self.setArm()
-        time.sleep(1)
+        # time.sleep(1)
+        rospy.Rate(1).sleep()
         print("setArm 2")
         self.setArm()
-        time.sleep(1)
+        # time.sleep(1)
+        rospy.Rate(1).sleep()
         print("setTakeoffMode")
         self.setTakeoffMode()
         time.sleep(5)
+        rospy.Rate(5).sleep()
+
         
     def land_drone(self):
         print("setLandMode")
