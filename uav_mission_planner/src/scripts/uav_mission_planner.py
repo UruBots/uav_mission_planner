@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import time
-from scripts.mavros_controller import *
+from mavros_controller import *
 
 def go_to_destination(dest = "2.8, 0.0, 2.0, 1.0"):
     x, y, z, w = dest.split(",")
