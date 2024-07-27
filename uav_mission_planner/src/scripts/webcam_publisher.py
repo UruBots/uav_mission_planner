@@ -10,7 +10,13 @@ class ImagePublisher:
         rospy.init_node('image_publisher', anonymous=True)
         self.bridge = CvBridge()
         # self.camera1 = rospy.Subscriber("/zed/zed_node/left/image_rect_color", Image, self.callbackZed)
-        self.camera0 = cv2.VideoCapture(0)
+        self.simulation = rospy.get_param('type', False)
+
+        if(self.simulation):
+            self.camera0 = cv2.VideoCapture(0)
+        else:
+            self.camera0 = cv2.VideoCapture(0)
+
         self.pub_cam0 = rospy.Publisher('/camera_0', Image, queue_size=10)
         self.pub_cam1 = rospy.Publisher('/camera_1', Image, queue_size=10)
         # self.rgb8pub = rospy.Publisher('/camera_1/rgb', Image, queue_size=10)

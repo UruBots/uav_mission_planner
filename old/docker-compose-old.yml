@@ -15,7 +15,7 @@ services:
       - DISPLAY=$DISPLAY
       - LIBGL_ALWAYS_SOFTWARE=1 
     command: bash -c 'roslaunch mrs_uav_gazebo_simulation simulation.launch world_name:=grass_plane gui:=true'
-    # rosservice call /mrs_drone_spawner/spawn "1 --$UAV_TYPE --enable-rangefinder --enable-dual-uv-cameras"'
+    # rosservice call /mrs_drone_spawner/spawn "1 --$UAV_TYPE --enable-rangefinder --enable-dual-uv-cameras"
     # rosservice call /mrs_drone_spawner/spawn "1 2 3 4 5 --f450 --enable-rangefinder --enable-uv-leds --enable-dual-uv-cameras"
 
     # roslaunch mrs_uav_px4_api api.launch
