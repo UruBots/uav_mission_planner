@@ -13,7 +13,7 @@ class ImagePublisher:
         self.simulation = rospy.get_param('type', False)
 
         if(self.simulation):
-            self.camera0 = cv2.VideoCapture(0)
+            self.camera0 = rospy.Subscriber("/uav1/rgbd_down/color/image_raw", Image)
         else:
             self.camera0 = cv2.VideoCapture(0)
 

@@ -40,7 +40,7 @@ services:
       - config:/etc/config:consistent
     env_file:
       - .env
-    command: bash -c 'waitForGazebo; rosservice call /mrs_drone_spawner/spawn "1 --$$UAV_TYPE --enable-rangefinder --enable-uv-leds --enable-dual-uv-cameras"'
+    command: bash -c 'waitForGazebo; rosservice call /mrs_drone_spawner/spawn "1 --$$UAV_TYPE --enable-rangefinder --enable-uv-leds --enable-dual-uv-cameras --enable-realsense-front --enable-realsense-down"'
 
   hw_api:
     image: ctumrs/mrs_uav_system:latest
@@ -91,25 +91,26 @@ services:
     environment:
         DISPLAY: $DISPLAY
     command: bash -c "waitForHw && roslaunch mrs_uav_core rviz.launch"
-  # mission_planner:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   image: mission_planner
-  #   container_name: mission_planner
-  #   depends_on:
-  #     - ros-master
-  #   network_mode: host
-  #   volumes:
-  #     # - config:/etc/config:consistent
-  #       # mount the folders below to enable passing GUI to the host
-  #     - /tmp/.X11-unix:/tmp/.X11-unix
-  #     # - /dev/dri:/dev/dri
-  #     - ~/.Xauthority:/root/.Xauthority
-  #     - ./uav_mission_planner:/home/drone/catkin_ws/src/uav_mission_planner
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - DISPLAY=$DISPLAY
-  #   command: bash -c 'waitForHw && roslaunch uav_mission_planner mission.launch type:=1'
+  
+  mission_planner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mission_planner
+    container_name: mission_planner
+    depends_on:
+      - ros-master
+    network_mode: host
+    volumes:
+      # - config:/etc/config:consistent
+        # mount the folders below to enable passing GUI to the host
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # - /dev/dri:/dev/dri
+      - ~/.Xauthority:/root/.Xauthority
+      - ./uav_mission_planner:/home/drone/catkin_ws/src/uav_mission_planner
+    env_file:
+      - .env
+    environment:
+      - DISPLAY=$DISPLAY
+    command: bash -c 'waitForHw && roslaunch uav_mission_planner mission.launch type:=1'
 

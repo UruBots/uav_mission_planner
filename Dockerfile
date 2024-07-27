@@ -24,4 +24,5 @@ cd /home/drone/catkin_ws && \
 catkin_make
 
 RUN cd /home/drone/catkin_ws/src/uav_mission_planner && pip install -r requirements.txt
-RUN source /home/drone/catkin_ws/devel/setup.bash && roslaunch mrs_simulation simulation.launch gui:=true world_file:='$(find fira_challenge_env)/worlds/challenge.world'
+RUN source /home/drone/catkin_ws/devel/setup.bash 
+# RUN source /opt/ros/noetic/setup.bash && roslaunch mrs_simulation simulation.launch gui:=true world_file:='$(find fira_challenge_env)/worlds/challenge.world'
