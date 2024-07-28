@@ -99,7 +99,7 @@ services:
     image: mission_planner
     container_name: mission_planner
     depends_on:
-      - ros-master
+      - rviz
     network_mode: host
     volumes:
       # - config:/etc/config:consistent
@@ -112,5 +112,5 @@ services:
       - .env
     environment:
       - DISPLAY=$DISPLAY
-    command: bash -c 'waitForHw && roslaunch uav_mission_planner mission.launch type:=1'
+    command: bash -c 'tail -f /dev/null'
 

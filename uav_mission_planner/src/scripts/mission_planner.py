@@ -18,7 +18,7 @@ class MissionController(object):
 		self.status = Status.NotInited
   		# Parameters
 		self.type = rospy.get_param('type', 1)
-		self.simulation = rospy.get_param('type', False)
+		self.simulation = rospy.get_param('simulation', False)
 		# utils
 		self.qr_reader = None
 		self.qr_count = 0

@@ -10,10 +10,11 @@ class ImagePublisher:
         rospy.init_node('image_publisher', anonymous=True)
         self.bridge = CvBridge()
         # self.camera1 = rospy.Subscriber("/zed/zed_node/left/image_rect_color", Image, self.callbackZed)
-        self.simulation = rospy.get_param('type', False)
-
+        self.simulation = rospy.get_param('simulation', False)
+        print("simmm", rospy.get_param('simulation', False))
+        print("###### simulation webcam #####", self.simulation)
         if(self.simulation):
-            self.camera0 = rospy.Subscriber("/uav1/rgbd_down/color/image_raw", Image)
+            self.camera0 = rospy.Subscriber("/uav1/rgbd_down/color/image_raw", Image, self.callbackCamera)
         else:
             self.camera0 = cv2.VideoCapture(0)
 
@@ -23,16 +24,19 @@ class ImagePublisher:
         # self.bgr8pub = rospy.Publisher('/camera_1/bgr', Image, queue_size=10)
         # self.mono8pub = rospy.Publisher('/camera_1/mono', Image, queue_size=10)
         
-    # def callbackZed(self, data):
-    #     try:
-    #         cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-    #     except CvBridgeError as e:
-    #         rospy.logerr(e)
-    #         return
+    def callbackCamera(self, data):
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        except CvBridgeError as e:
+            rospy.logerr(e)
+            return
+
+        print(cv_image)
         
-    #     # Process the image using OpenCV (e.g., display it)
-    #     cv2.imshow("Image from ZED Camera", cv_image)
-    #     cv2.waitKey(3)
+
+        # Process the image using OpenCV (e.g., display it)
+        #cv2.imshow("Image from ZED Camera", cv_image)
+        #cv2.waitKey(3)
         
 
     def run(self):
@@ -66,7 +70,7 @@ class ImagePublisher:
 def main(args=None):
     ip = ImagePublisher()
     print("Publishing image from webcam...")
-    ip.run()
+    #ip.run()
 
 if __name__ == '__main__':
     main()

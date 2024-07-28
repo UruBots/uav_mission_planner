@@ -13,7 +13,7 @@
       <arg name="verbose" value="$(arg verbose)"/>
       <arg name="gui" value="$(arg gui)"/>
     </include>
-    <include file="$(find sjtu_drone)/launch/main.launch"/>
+    <!-- <include file="$(find sjtu_drone)/launch/main.launch"/> -->
     
     <include file="$(find gate_system)/launch/gazebo.launch"/>
 

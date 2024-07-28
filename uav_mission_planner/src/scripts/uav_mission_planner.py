@@ -1,43 +1,54 @@
 #!/usr/bin/env python
 import time
-from mavros_controller import *
+import rospy
+from mavros_controller import MavrosController
 
-def go_to_destination(dest = "2.8, 0.0, 2.0, 1.0"):
+controller = MavrosController()
+simulation = rospy.get_param('simulation', True)
+print("#####################", simulation)
+if simulation:
+    controller.simulation = simulation
+
+def go_to_destination(dest = "2.0, 0.0, 0.0, 0.0"):
     x, y, z, w = dest.split(",")
-    setGuidedMode()
+    print("setGuidedMode")
+    controller.setGuidedMode()
     time.sleep(1)
-    pub_reset_gps()
+    print("pub_reset_gps")
+    controller.pub_reset_gps()
     time.sleep(1)
+    print("/mavros/vision_pose/tf/listen")
     rospy.set_param("/mavros/vision_pose/tf/listen", True)
     time.sleep(5)
-    setArm()
+    print("setArm")
+    controller.setArm()
     time.sleep(1)
-    setTakeoffMode()
+    print("setTakeoffMode")
+    controller.setTakeoffMode()
     time.sleep(5)
-    set_target_position(x, y, z, w)
+    print("set_target_position")
+    controller.set_target_position(x, y, z, w)
+    time.sleep(10)
+    print("setLandMode")
+    controller.setLandMode()
     time.sleep(1)
-    setTakeoffMode()
-    time.sleep(1)
-    setDisarm()
+    print("setDisarm")
+    controller.setDisarm()
 
 def read_qr_and_go_to_destination():
-    setGuidedMode()
+    controller.setGuidedMode()
     time.sleep(1)
-    pub_reset_gps()
+    controller.pub_reset_gps()
     time.sleep(1)
     rospy.set_param("/mavros/vision_pose/tf/listen", True)
     time.sleep(5)
-    setArm()
+    controller.setArm()
     time.sleep(1)
-    setTakeoffMode()
+    controller.setTakeoffMode()
     time.sleep(15)
     # read qr codes with node.
-    
     time.sleep(1)
-    setDisarm()
-
-    
-
+    controller.setDisarm()
 
 def menu():
     print("Press")
@@ -56,19 +67,19 @@ def myLoop():
     x='1'
     while ((not rospy.is_shutdown())and (x in ['1','2','3','4','5','6','7','8','9', '10'])):
         menu()
-        x = raw_input("Enter your input: ")
+        x = input("Enter your input: ")
         if (x=='1'):
-            setGuidedMode()
+            controller.setGuidedMode()
         elif(x=='2'):
-            setStabilizeMode()
+            controller.setStabilizeMode()
         elif(x=='3'):
-            setArm()
+            controller.setArm()
         elif(x=='4'):
-            setDisarm()
+            controller.setDisarm()
         elif(x=='5'):
-            setTakeoffMode()
+            controller.setTakeoffMode()
         elif(x=='6'):
-            setLandMode()
+            controller.setLandMode()
         elif(x=='7'):
             global latitude
             global longitude
@@ -81,7 +92,7 @@ def myLoop():
         elif(x=='9'):
             read_qr_and_go_to_destination()
         elif(x=='10'):
-            pub_reset_gps()
+            controller.pub_reset_gps()
         else:
             print("Exit")
 
