@@ -32,8 +32,9 @@ def set_pose(x, y, z):
     return pose
 
 def go_to(x,y,z):
-    pose = set_pose(x, y, z)
     try:
+        pose = set_pose(x, y, z)
+        print("#### NEW POSE ####", pose)
         set_point_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
         set_point_pub.publish(pose)
     except rospy.ServiceException as e:
@@ -165,7 +166,7 @@ def read_qr_and_go_to_destination():
     print("take off")
     time.sleep(5)
     # 1 meter
-    go_to(1.0,0,0)
+    go_to(0.5,0.0,0.5)
     time.sleep(5)
     # read qr codes with node.
     setLandMode()
