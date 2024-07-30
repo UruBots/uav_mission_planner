@@ -20,6 +20,25 @@ def call_set_mode(mode, mode_ID):
     except rospy.ServiceException as e:
         print('Service call failed: %s' % e)
 
+def set_pose(x, y, z):
+    pose = PoseStamped()
+    pose.pose.position.x = x
+    pose.pose.position.y = y
+    pose.pose.position.z = z
+    pose.pose.orientation.x = 0
+    pose.pose.orientation.y = 0
+    pose.pose.orientation.z = 0
+    pose.pose.orientation.w = 1
+    return pose
+
+def go_to(x,y,z):
+    pose = set_pose(x, y, z)
+    try:
+        set_point_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
+        set_point_pub.publish(pose)
+    except rospy.ServiceException as e:
+        print("Service set_target_position call failed: %s" % e)
+
 def pub_reset_gps():
     for i in range (0,5):
      try:
@@ -144,6 +163,9 @@ def read_qr_and_go_to_destination():
     time.sleep(1)
     setTakeoffMode()
     print("take off")
+    time.sleep(5)
+    # 1 meter
+    go_to(1.0,0,0)
     time.sleep(5)
     # read qr codes with node.
     setLandMode()
