@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import time
 import rospy
 from std_msgs.msg import String
@@ -187,7 +187,7 @@ def myLoop():
     x='1'
     while ((not rospy.is_shutdown())and (x in ['1','2','3','4','5','6','7','8','9', '10'])):
         menu()
-        x = raw_input("Enter your input: ")
+        x = input("Enter your input: ")
         if (x=='1'):
             setGuidedMode()
         elif(x=='2'):
