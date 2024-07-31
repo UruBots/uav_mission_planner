@@ -36,7 +36,6 @@ def go_to(x,y,z):
     rospy.wait_for_service("/zedm/zed_node/set_pose")
     try:
         # pose = set_pose(x, y, z)
-        print("#### NEW POSE ####", pose)
         pose_pub = rospy.ServiceProxy("/zedm/zed_node/set_pose", zed_interfaces.srv.set_pose)
         resp = pose_pub(x, y, z)
         # pub_pose = set_point_pub.publish(pose)
@@ -170,7 +169,7 @@ def read_qr_and_go_to_destination():
     print("take off")
     time.sleep(5)
     # 1 meter
-    go_to(0.5,0.0,0.5)
+    go_to(-0.5,0.0,0.0)
     time.sleep(5)
     # read qr codes with node.
     setLandMode()
