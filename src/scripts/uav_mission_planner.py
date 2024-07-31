@@ -37,8 +37,8 @@ def go_to(x,y,z):
     try:
         pose = set_pose(x, y, z)
         print("#### NEW POSE ####", pose)
-        set_pose = rospy.ServiceProxy("/zedm/zed_node/set_pose", set_pose)
-        resp = set_pose(x, y, z)
+        pose_pub = rospy.ServiceProxy("/zedm/zed_node/set_pose", set_pose)
+        resp = pose_pub(x, y, z)
         # pub_pose = set_point_pub.publish(pose)
         print("#### publish goto ####", resp)
     except rospy.ServiceException as e:
