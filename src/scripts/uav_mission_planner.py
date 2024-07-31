@@ -33,11 +33,11 @@ def set_pose(x, y, z):
     return pose
 
 def go_to(x,y,z):
-    rospy.wait_for_service("zed_interfaces/set_pose")
+    rospy.wait_for_service("/zedm/zed_node/set_pose")
     try:
         pose = set_pose(x, y, z)
         print("#### NEW POSE ####", pose)
-        set_pose = rospy.ServiceProxy("zed_interfaces/set_pose", set_pose)
+        set_pose = rospy.ServiceProxy("/zedm/zed_node/set_pose", set_pose)
         resp = set_pose(x, y, z)
         # pub_pose = set_point_pub.publish(pose)
         print("#### publish goto ####", resp)
