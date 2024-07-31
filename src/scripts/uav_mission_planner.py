@@ -21,23 +21,23 @@ def call_set_mode(mode, mode_ID):
     except rospy.ServiceException as e:
         print('Service call failed: %s' % e)
 
-def set_pose(x, y, z):
-    pose = PoseStamped()
-    pose.pose.position.x = x
-    pose.pose.position.y = y
-    pose.pose.position.z = z
-    pose.pose.orientation.x = 0
-    pose.pose.orientation.y = 0
-    pose.pose.orientation.z = 0
-    pose.pose.orientation.w = 1
-    return pose
+# def set_pose(x, y, z):
+#     pose = PoseStamped()
+#     pose.pose.position.x = x
+#     pose.pose.position.y = y
+#     pose.pose.position.z = z
+#     pose.pose.orientation.x = 0
+#     pose.pose.orientation.y = 0
+#     pose.pose.orientation.z = 0
+#     pose.pose.orientation.w = 1
+#     return pose
 
 def go_to(x,y,z):
     rospy.wait_for_service("/zedm/zed_node/set_pose")
     try:
-        pose = set_pose(x, y, z)
+        # pose = set_pose(x, y, z)
         print("#### NEW POSE ####", pose)
-        pose_pub = rospy.ServiceProxy("/zedm/zed_node/set_pose", set_pose)
+        pose_pub = rospy.ServiceProxy("/zedm/zed_node/set_pose", zed_interfaces.srv.set_pose)
         resp = pose_pub(x, y, z)
         # pub_pose = set_point_pub.publish(pose)
         print("#### publish goto ####", resp)
