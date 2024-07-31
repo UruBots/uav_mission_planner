@@ -7,6 +7,7 @@ from mavros_msgs.srv import *
 from mavros_msgs.msg import *
 from geographic_msgs.msg import *
 from geometry_msgs.msg import *
+from zed_interfaces.srv import set_pose
 
 #global variable
 latitude = 0.0
@@ -32,11 +33,14 @@ def set_pose(x, y, z):
     return pose
 
 def go_to(x,y,z):
+    rospy.wait_for_service("zed_interfaces/set_pose")
     try:
         pose = set_pose(x, y, z)
         print("#### NEW POSE ####", pose)
-        set_point_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
-        set_point_pub.publish(pose)
+        set_pose = rospy.ServiceProxy("zed_interfaces/set_pose", set_pose)
+        resp = set_pose(x, y, z)
+        # pub_pose = set_point_pub.publish(pose)
+        print("#### publish goto ####", resp)
     except rospy.ServiceException as e:
         print("Service set_target_position call failed: %s" % e)
 
