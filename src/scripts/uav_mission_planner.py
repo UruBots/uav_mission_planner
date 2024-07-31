@@ -13,6 +13,8 @@ from zed_interfaces.srv import *
 latitude = 0.0
 longitude = 0.0
 
+set_point_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
+
 def call_set_mode(mode, mode_ID):
     try:
         service = rospy.ServiceProxy("/mavros/set_mode", SetMode)
@@ -21,25 +23,31 @@ def call_set_mode(mode, mode_ID):
     except rospy.ServiceException as e:
         print('Service call failed: %s' % e)
 
-# def set_pose(x, y, z):
-#     pose = PoseStamped()
-#     pose.pose.position.x = x
-#     pose.pose.position.y = y
-#     pose.pose.position.z = z
-#     pose.pose.orientation.x = 0
-#     pose.pose.orientation.y = 0
-#     pose.pose.orientation.z = 0
-#     pose.pose.orientation.w = 1
-#     return pose
+def create_pose(x, y, z):
+    pose = PoseStamped()
+    pose.pose.position.x = x
+    pose.pose.position.y = y
+    pose.pose.position.z = z
+    pose.pose.orientation.x = 0
+    pose.pose.orientation.y = 0
+    pose.pose.orientation.z = 0
+    pose.pose.orientation.w = 0
+    return pose
 
-def go_to(x,y,z):
+def go_to_zed(x,y,z):
     rospy.wait_for_service("/zedm/zed_node/set_pose")
     try:
-        # pose = set_pose(x, y, z)
         pose_pub = rospy.ServiceProxy("/zedm/zed_node/set_pose", set_pose)
         resp = pose_pub(x, y, z, 0, 0, 0)
-        # pub_pose = set_point_pub.publish(pose)
         print("#### publish goto ####", resp)
+    except rospy.ServiceException as e:
+        print("Service set_target_position call failed: %s" % e)
+
+def go_to(x,y,z):
+    try:
+        pose = create_pose(x, y, z)
+        pub_pose = set_point_pub.publish(pose)
+        print("#### publish goto ####", pub_pose)
     except rospy.ServiceException as e:
         print("Service set_target_position call failed: %s" % e)
 
@@ -169,7 +177,7 @@ def read_qr_and_go_to_destination():
     print("take off")
     time.sleep(5)
     # 1 meter
-    go_to(-0.5,0.0,0.0)
+    go_to(0.5,0.0,1.0)
     time.sleep(5)
     # read qr codes with node.
     setLandMode()
