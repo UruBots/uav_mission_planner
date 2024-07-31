@@ -7,7 +7,7 @@ from mavros_msgs.srv import *
 from mavros_msgs.msg import *
 from geographic_msgs.msg import *
 from geometry_msgs.msg import *
-from zed_interfaces.msg import *
+from zed_interfaces.srv import *
 
 #global variable
 latitude = 0.0
@@ -37,7 +37,7 @@ def go_to(x,y,z):
     try:
         # pose = set_pose(x, y, z)
         pose_pub = rospy.ServiceProxy("/zedm/zed_node/set_pose", set_pose)
-        resp = pose_pub(x, y, z)
+        resp = pose_pub(x, y, z, 0, 0, 0)
         # pub_pose = set_point_pub.publish(pose)
         print("#### publish goto ####", resp)
     except rospy.ServiceException as e:
