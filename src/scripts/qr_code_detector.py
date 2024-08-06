@@ -8,7 +8,6 @@ import cv2
 from pyzbar.pyzbar import decode
 
 class CameraReader:
-
     def __init__(self):
         rospy.init_node('camera_read', anonymous=False)
         self.bridge = CvBridge()
@@ -41,7 +40,7 @@ class CameraReader:
             text = "{}".format(qr_data)
             cv2.putText(resized_image, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             self.qr_to_move.publish(qr_data)
-        cv2.imshow("Camera output", resized_image)
+        # cv2.imshow("Camera output", resized_image)
         cv2.waitKey(5)
 
 def main():

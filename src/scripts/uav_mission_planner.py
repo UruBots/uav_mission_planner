@@ -7,14 +7,26 @@ from mavros_msgs.srv import *
 from mavros_msgs.msg import *
 from geographic_msgs.msg import *
 from geometry_msgs.msg import *
-from zed_interfaces.srv import *
-
 #global variable
 latitude = 0.0
 longitude = 0.0
+qr_code = None
+global local_position
+local_position = None
+global pose_x
+global pose_y
+global distanceQR
+distanceQR = 1.25
+global mission
+global pose
 
 set_point_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
+rospy.Subscriber("/mavros/local_position/pose", PoseStamped, local_position_callback)
 
+def local_position_callback(data):
+    local_position_pose = data
+    print(local_position_pose)
+    
 def call_set_mode(mode, mode_ID):
     try:
         service = rospy.ServiceProxy("/mavros/set_mode", SetMode)
@@ -22,34 +34,6 @@ def call_set_mode(mode, mode_ID):
         print(service(mode_ID, mode))
     except rospy.ServiceException as e:
         print('Service call failed: %s' % e)
-
-def create_pose(x, y, z):
-    pose = PoseStamped()
-    pose.pose.position.x = x
-    pose.pose.position.y = y
-    pose.pose.position.z = z
-    pose.pose.orientation.x = 0
-    pose.pose.orientation.y = 0
-    pose.pose.orientation.z = 0
-    pose.pose.orientation.w = 0
-    return pose
-
-def go_to_zed(x,y,z):
-    rospy.wait_for_service("/zedm/zed_node/set_pose")
-    try:
-        pose_pub = rospy.ServiceProxy("/zedm/zed_node/set_pose", set_pose)
-        resp = pose_pub(x, y, z, 0, 0, 0)
-        print("#### publish goto ####", resp)
-    except rospy.ServiceException as e:
-        print("Service set_target_position call failed: %s" % e)
-
-def go_to(x,y,z):
-    try:
-        pose = create_pose(x, y, z)
-        pub_pose = set_point_pub.publish(pose)
-        print("#### publish goto ####", pub_pose)
-    except rospy.ServiceException as e:
-        print("Service set_target_position call failed: %s" % e)
 
 def pub_reset_gps():
     for i in range (0,5):
@@ -70,7 +54,7 @@ def setGuidedMode():
     except rospy.ServiceException as e:
         print("service set_mode call failed: %s. GUIDED Mode could not be set. Check that GPS is enabled" % e)
 
-# TODO change to call_set_mode        
+# TODO change to call_set_mode
 def setStabilizeMode():
     rospy.wait_for_service('/mavros/set_mode')
     try:
@@ -86,7 +70,7 @@ def setLandMode():
         isLanding = landService(altitude = 0, latitude = 0, longitude = 0, min_pitch = 0, yaw = 0)
     except rospy.ServiceException as e:
         print("service land call failed: %s. The vehicle cannot land " % e)
-          
+
 def setArm():
     pub_reset_gps()
     time.sleep(1)
@@ -100,7 +84,7 @@ def setArm():
         armService(True)
     except rospy.ServiceException as e:
         print("Service arm call failed: %s"%e)
-        
+
 def setDisarm():
     rospy.wait_for_service('/mavros/cmd/arming')
     try:
@@ -126,20 +110,63 @@ def globalPositionCallback(globalPositionCallback):
     #print ("longitude: %.7f" %longitude)
     #print ("latitude: %.7f" %latitude)
 
-def set_target_position(x,y,z,w):
+def set_target_position(x,y,z,w=1):
     pose = PoseStamped()
     pose.pose.position.x = x
     pose.pose.position.y = y
     pose.pose.position.z = z
+    pose.pose.orientation.x = 0
+    pose.pose.orientation.y = 0
+    pose.pose.orientation.z = 0
     pose.pose.orientation.w = w
 
     try:
-        set_point_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
         set_point_pub.publish(pose)
     except rospy.ServiceException as e:
         print("Service set_target_position call failed: %s" % e)
 
-def go_to_destination(dest = "2.8, 0.0, 2.0, 1.0"):
+def follow_line():
+    pass
+
+def string_to_pose(self, input_string):
+    global mission
+    global pose
+
+    #TODO replace data from string 
+    parts = input_string.replace('data: ', '').replace('"', '').split(',')
+    if len(parts) != 5:
+        raise ValueError("Input string should have 5 comma-separated values")
+
+    if (parts[-1] == 0):
+        # Asignar la orientacion basada en la direccion de la secuencia
+        if parts[mission-1] == 'N':
+            pose.pose.position.x += 1.0
+            pose.pose.position.y += 0.0           
+        elif parts[mission-1] == 'E':
+            pose.pose.position.x += 0.0
+            pose.pose.position.y += -1.0
+        elif parts[mission-1] == 'S':
+            pose.pose.position.x += -1.0
+            pose.pose.position.y += 0.0
+        elif parts[mission-1] == 'W':
+            pose.pose.position.x += 0.0
+            pose.pose.position.y += 1.0
+            
+        rospy.loginfo("string_to_pose -> %s" % pose)
+        # Asignar el numero de posicion objetivo
+        #pose.header.stamp = rospy.Time.now()
+        #pose.header.frame_id = 'map'  # Ajustar el frame_id segun sea necesario
+        #pose.pose.position.z = float(parts[4])
+
+        return pose
+
+def go_to_destination(dest = "1.0, 0.0, 1.0, 0.0"):
+    global pose
+    global distanceQR
+    global mission
+    mission = 1
+    pose = PoseStamped()
+        
     x, y, z, w = dest.split(",")
     setGuidedMode()
     time.sleep(1)
@@ -158,29 +185,48 @@ def go_to_destination(dest = "2.8, 0.0, 2.0, 1.0"):
     setDisarm()
 
 def read_qr_and_go_to_destination():
-    time.sleep(1)
-    setGuidedMode()
-    print("Setou")
-    time.sleep(1)
-    rospy.set_param("/mavros/vision_pose/tf/listen", True)
-    time.sleep(1)
-    pub_reset_gps()
-    pub_reset_gps()
-    print("Fake gps")
-    time.sleep(5)
-    setArm()
-    time.sleep(1)
-    setArm()
-    print("armou")
-    time.sleep(1)
-    setTakeoffMode()
-    print("take off")
-    time.sleep(5)
-    # 1 meter
-    go_to(0.5,0.0,1.0)
-    time.sleep(5)
-    # read qr codes with node.
-    setLandMode()
+    global mission
+    mission = 1
+    try:
+        if (local_position != None):
+            time.sleep(1)
+            setGuidedMode()
+            rospy.loginfo("Setou")
+            time.sleep(1)
+            rospy.set_param("/mavros/vision_pose/tf/listen", True)
+            time.sleep(1)
+            pub_reset_gps()
+            pub_reset_gps()
+            rospy.loginfo("Fake gps")
+            time.sleep(5)
+            setArm()
+            time.sleep(1)
+            setArm()
+            rospy.loginfo("armou")
+            time.sleep(1)
+            setTakeoffMode()
+            rospy.loginfo("take off")
+            time.sleep(5)
+            # 1 meter to the rgight
+            set_target_position(0.0,-distanceQR,0.0)
+            # set_target_position(0.0,1.0,0.0)
+            time.sleep(5)
+            # set_target_position(0.0, 2.0, 0.0)
+            # time.sleep(5)
+            # set_target_position(0.0, 3.0, 0.0)
+            # time.sleep(5)
+            qr_detected = rospy.wait_for_message('/qrcode/raw', String, timeout=5)
+            if(qr_detected):
+                rospy.loginfo("QR Code detected", qr_detected)
+                string_to_pose(qr_detected)
+            else:
+                rospy.loginfo("QR Code not detected")
+                setLandMode()
+            # read qr codes with node.
+            setLandMode()
+    except rospy.ServiceException as e:
+        rospy.loginfo("Exception read_qr_and_go_to_destination", e)
+        setLandMode()
 
 def menu():
     print("Press")
