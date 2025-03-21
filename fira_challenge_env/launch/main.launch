@@ -6,17 +6,17 @@
     <arg name="verbose" value="false"/>
     <arg name="gui" value="true"/>
 
-    <!-- launch the custom world -->
+    <!-- launch the custom world
     <include file="$(find gazebo_ros)/launch/empty_world.launch" >
       <arg name="paused" value="$(arg paused)"/>
       <arg name="world_name" value="$(arg world_name)"/>
       <arg name="verbose" value="$(arg verbose)"/>
       <arg name="gui" value="$(arg gui)"/>
-    </include>
+    </include> -->
 
-    <include file="$(find sjtu_drone)/launch/main.launch"/>
+    <!-- <include file="$(find sjtu_drone)/launch/main.launch"/> -->
     
-    <!-- <include file="$(find gate_system)/launch/gazebo.launch"/> -->
+    <include file="$(find gate_system)/launch/gazebo.launch"/>
 
     <!-- <node name="randomizer" pkg="gate_system" type="randomizer.py" output="screen" launch-prefix="bash -c 'sleep 3; $0 $@' "/> -->
     

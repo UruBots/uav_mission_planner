@@ -10,9 +10,8 @@ class ImagePublisher:
         rospy.init_node('image_publisher', anonymous=True)
         self.bridge = CvBridge()
         # self.camera1 = rospy.Subscriber("/zed/zed_node/left/image_rect_color", Image, self.callbackZed)
-        self.simulation = rospy.get_param('simulation', False)
-        print("simmm", rospy.get_param('simulation', False))
-        print("###### simulation webcam #####", self.simulation)
+        self.simulation = rospy.get_param('simulation', True)
+        rospy.logerr("###### simulation webcam ##### value %s", self.simulation)
         if(self.simulation):
             self.camera0 = rospy.Subscriber("/uav1/rgbd_down/color/image_raw", Image, self.callbackCamera)
         else:

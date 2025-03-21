@@ -3,12 +3,12 @@
 <launch>
   <!-- Include main launch file -->
   <param name="type" value="1"/>
-  <param name="simulation" value="false" />
+  <param name="simulation" value="True" />
 
-  <node name="webcam_publisher" pkg="uav_mission_planner" type="webcam_publisher.py">
+  <!-- <node name="webcam_publisher" pkg="uav_mission_planner" type="webcam_publisher.py">
       <param name="simulation" value="$(arg simulation)"/>
   </node>
-  <node name="qr_code_detector" pkg="uav_mission_planner" type="qr_code_detector.py" output="screen"/>
+  <node name="qr_code_detector" pkg="uav_mission_planner" type="qr_code_detector.py" output="screen"/> -->
   <node name="uav_mission_planner" pkg="uav_mission_planner" type="mission_planner.py">
     <param name="type" value="$(arg type)"/>
   </node>

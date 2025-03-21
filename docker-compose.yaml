@@ -40,7 +40,8 @@ services:
       - config:/etc/config:consistent
     env_file:
       - .env
-    command: bash -c 'waitForGazebo; rosservice call /mrs_drone_spawner/spawn "1 --$$UAV_TYPE --enable-rangefinder --enable-uv-leds --enable-dual-uv-cameras --enable-realsense-front --enable-realsense-down"'
+    # command: bash -c 'waitForGazebo; rosservice call /mrs_drone_spawner/spawn "1 --$$UAV_TYPE --enable-rangefinder --enable-uv-leds --enable-dual-uv-cameras --enable-realsense-front --enable-realsense-down"'
+    command: bash -c 'waitForGazebo; rosservice call /mrs_drone_spawner/spawn "1 --$$UAV_TYPE --enable-rangefinder --enable-realsense-front --enable-realsense-down"'
 
   hw_api:
     image: ctumrs/mrs_uav_system:latest
@@ -108,6 +109,8 @@ services:
       # - /dev/dri:/dev/dri
       - ~/.Xauthority:/root/.Xauthority
       - ./uav_mission_planner:/home/drone/catkin_ws/src/uav_mission_planner
+      - ./fira_challenge_env:/home/drone/catkin_ws/src/fira_challenge_env
+      - ./gate_system:/home/drone/catkin_ws/src/gate_system
     env_file:
       - .env
     environment:
