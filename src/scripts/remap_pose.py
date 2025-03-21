@@ -31,8 +31,8 @@ def main():
     vision_pose_pub = rospy.Publisher("/mavros/vision_pose/pose_cov", PoseWithCovarianceStamped, queue_size=1)
     vision_pose_pub_pose = rospy.Publisher("/mavros/vision_pose/pose", PoseStamped, queue_size=1)  # New publisher
 
-    # Sleep for 15 seconds to allow startup time
-    rospy.sleep(15)
+    # Sleep for 60 seconds to allow startup time
+    rospy.sleep(60)
 
     # Set loop rate 45 Hz (45 times per second)
     rate = rospy.Rate(45)
@@ -44,6 +44,7 @@ def main():
     rospy.loginfo("Start vision pose information message!")
 
     while not rospy.is_shutdown():
+        rospy.loginfo("Remapping vision pose information message!")
         # Create PoseWithCovarianceStamped message
         cur_pose_cov = PoseWithCovarianceStamped()
         cur_pose_cov.header.frame_id = "odom"
@@ -59,8 +60,8 @@ def main():
         # Publish messages
         vision_pose_pub.publish(cur_pose_cov)
         vision_pose_pub_pose.publish(cur_pose)
-
-        rospy.loginfo("Published remapped poses.", cur_pose_cov, cur_pose)
+        rospy.loginfo("Published remapped poses.")
+        # rospy.loginfo("Published remapped poses.", cur_pose_cov, cur_pose)
 
         # Maintain loop rate
         rate.sleep()
