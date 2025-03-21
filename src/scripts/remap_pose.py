@@ -54,13 +54,13 @@ def main():
         print("#### zed_current_odom",zed_current_odom)
         print("#### zed_current_odom_cov",zed_current_odom_cov.pose)
         # Create PoseWithCovarianceStamped message
-        cur_pose_cov = PoseWithCovarianceStamped()
+        cur_pose_cov = PoseStamped()
         cur_pose_cov.header.frame_id = "odom"
         cur_pose_cov.header.stamp = rospy.Time.now()
         cur_pose_cov.pose = zed_current_odom.pose
 
         # Create PoseStamped message
-        cur_pose = PoseStamped()
+        cur_pose = PoseWithCovarianceStamped()
         cur_pose.header.frame_id = "odom"
         cur_pose.header.stamp = rospy.Time.now()
         cur_pose.pose = zed_current_odom_cov.pose.pose  # Adjusting for PoseStamped format
