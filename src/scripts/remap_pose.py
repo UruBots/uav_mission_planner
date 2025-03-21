@@ -34,8 +34,8 @@ def main():
     rospy.Subscriber("/zedm/zed_node/pose_with_covariance", PoseWithCovarianceStamped, zed_odom_cov_cb)  # New subscriber
 
     # Publishers
-    vision_pose_pub = rospy.Publisher("/mavros/vision_pose/pose_cov", PoseWithCovarianceStamped, queue_size=1)
-    vision_pose_pub_pose = rospy.Publisher("/mavros/vision_pose/pose", PoseStamped, queue_size=1)  # New publisher
+    vision_pose_pub_cov = rospy.Publisher("/mavros/vision_pose/pose_cov", PoseWithCovarianceStamped, queue_size=1)
+    vision_pose_pub = rospy.Publisher("/mavros/vision_pose/pose", PoseStamped, queue_size=1)  # New publisher
 
     # Sleep for 60 seconds to allow startup time
     rospy.sleep(60)
@@ -54,20 +54,20 @@ def main():
         print("#### zed_current_odom",zed_current_odom)
         print("#### zed_current_odom_cov",zed_current_odom_cov.pose)
         # Create PoseWithCovarianceStamped message
-        cur_pose_cov = PoseStamped()
-        cur_pose_cov.header.frame_id = "odom"
-        cur_pose_cov.header.stamp = rospy.Time.now()
-        cur_pose_cov.pose = zed_current_odom.pose
-
-        # Create PoseStamped message
-        cur_pose = PoseWithCovarianceStamped()
+        cur_pose = PoseStamped()
         cur_pose.header.frame_id = "odom"
         cur_pose.header.stamp = rospy.Time.now()
-        cur_pose.pose = zed_current_odom_cov.pose.pose  # Adjusting for PoseStamped format
+        cur_pose.pose = zed_current_odom.pose
+
+        # Create PoseStamped message
+        cur_pose_cov = PoseWithCovarianceStamped()
+        cur_pose_cov.header.frame_id = "odom"
+        cur_pose_cov.header.stamp = rospy.Time.now()
+        cur_pose_cov.pose = zed_current_odom_cov.pose  # Adjusting for PoseStamped format
 
         # Publish messages
-        vision_pose_pub.publish(cur_pose_cov)
-        vision_pose_pub_pose.publish(cur_pose)
+        vision_pose_pub.publish(cur_pose)
+        vision_pose_pub_cov.publish(vision_pose_pub_cov)
         rospy.loginfo("Published remapped poses.")
         # rospy.loginfo("Published remapped poses.", cur_pose_cov, cur_pose)
 
