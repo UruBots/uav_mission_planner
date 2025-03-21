@@ -67,7 +67,7 @@ def main():
 
         # Publish messages
         vision_pose_pub.publish(cur_pose)
-        vision_pose_pub_cov.publish(vision_pose_pub_cov)
+        vision_pose_pub_cov.publish(cur_pose_cov)
         rospy.loginfo("Published remapped poses.")
         # rospy.loginfo("Published remapped poses.", cur_pose_cov, cur_pose)
 
