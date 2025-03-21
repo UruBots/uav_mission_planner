@@ -8,6 +8,7 @@ from mavros_msgs.msg import State
 # Global variables to store the current state and odometry data
 px4_current_state = State()
 zed_current_odom = Odometry()
+zed_current_odom_cov = Odometry()
 
 def px4_state_cb(msg):
     """ Callback function for PX4 state updates """
@@ -19,13 +20,18 @@ def zed_odom_cb(msg):
     global zed_current_odom
     zed_current_odom = msg
 
+def zed_odom_cov_cb(msg):
+    """ Callback function for ZED odometry updates """
+    global zed_current_odom_cov
+    zed_current_odom_cov = msg
+
 def main():
     rospy.init_node("remap_pose_node", anonymous=True)
 
     # Subscribers
     rospy.Subscriber("/mavros/state", State, px4_state_cb)
     rospy.Subscriber("/zedm/zed_node/pose", PoseStamped, zed_odom_cb)  # Now uses /zedm/zed_node/pose
-    rospy.Subscriber("/zedm/zed_node/pose_with_covariance", PoseWithCovarianceStamped, zed_odom_cb)  # New subscriber
+    rospy.Subscriber("/zedm/zed_node/pose_with_covariance", PoseWithCovarianceStamped, zed_odom_cov_cb)  # New subscriber
 
     # Publishers
     vision_pose_pub = rospy.Publisher("/mavros/vision_pose/pose_cov", PoseWithCovarianceStamped, queue_size=1)
@@ -45,6 +51,8 @@ def main():
 
     while not rospy.is_shutdown():
         rospy.loginfo("Remapping vision pose information message!")
+        print("#### zed_current_odom",zed_current_odom)
+        print("#### zed_current_odom_cov",zed_current_odom_cov.pose)
         # Create PoseWithCovarianceStamped message
         cur_pose_cov = PoseWithCovarianceStamped()
         cur_pose_cov.header.frame_id = "odom"
@@ -55,7 +63,7 @@ def main():
         cur_pose = PoseStamped()
         cur_pose.header.frame_id = "odom"
         cur_pose.header.stamp = rospy.Time.now()
-        cur_pose.pose = zed_current_odom.pose.pose  # Adjusting for PoseStamped format
+        cur_pose.pose = zed_current_odom_cov.pose.pose  # Adjusting for PoseStamped format
 
         # Publish messages
         vision_pose_pub.publish(cur_pose_cov)
