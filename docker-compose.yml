@@ -1,0 +1,14 @@
+services:
+  uav_mission_planner_ros2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uav_mission_planner_ros2
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+      - .:/root/uav_ws/src/uav_mission_planner
+    environment:
+      - DISPLAY=$DISPLAY
+      - LIBGL_ALWAYS_SOFTWARE=1 
+    command: tail -f /dev/null

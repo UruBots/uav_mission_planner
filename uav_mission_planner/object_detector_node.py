@@ -1,29 +1,40 @@
 #!/usr/bin/env python3
-import rospy
+
+import rclpy
+from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 
-class ObjectDetector:
+class ObjectDetector(Node):
     def __init__(self):
-        # Initialize the node
-        rospy.init_node('shape_detector')
+        # Initialize the ROS2 node
+        super().__init__('shape_detector')
+        
         # Create a CvBridge to convert ROS image messages to OpenCV images
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.image_callback)
+        
+        # Subscribe to the camera image topic
+        self.image_sub = self.create_subscription(
+            Image,
+            "/camera/image_raw",  # Adjust the topic name if needed
+            self.image_callback,
+            10  # QoS profile depth
+        )
+        self.image_sub  # Prevent unused variable warning
 
     # This function converts ROS image messages to OpenCV images
     def imgmsg_to_cv2(self, img_msg):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(img_msg, "bgr8")
         except CvBridgeError as e:
-            rospy.logerr("CvBridge Error: {0}".format(e))
+            self.get_logger().error(f"CvBridge Error: {e}")
             return None
         return cv_image
 
     # This function processes the images and returns the contours
-    def process_image(cv_image):
+    def process_image(self, cv_image):
         # Convert to grayscale and blur
         gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -34,7 +45,7 @@ class ObjectDetector:
         return contours
 
     # This function detects an 'H' shape and a rectangle frame from the contours
-    def detect_shapes(contours):
+    def detect_shapes(self, contours):
         shape_contours = {'H': [], 'rectangle': []}
         for cnt in contours:
             # Approximate the contour to a polygon
@@ -45,14 +56,14 @@ class ObjectDetector:
                 # Check if the shape is a rectangle by comparing the width and height
                 _, _, w, h = cv2.boundingRect(approx)
                 aspect_ratio = w / float(h)
-                if aspect_ratio > 0.8 and aspect_ratio < 1.2:
+                if 0.8 < aspect_ratio < 1.2:
                     shape_contours['rectangle'].append(approx)
             elif len(approx) == 12:  # Example: 'H' shape might be approximated to 12 vertices
                 shape_contours['H'].append(approx)
         return shape_contours
 
     # This function draws the detected shapes on the image
-    def draw_shapes(cv_image, shape_contours):
+    def draw_shapes(self, cv_image, shape_contours):
         for shape in shape_contours:
             for cnt in shape_contours[shape]:
                 cv2.drawContours(cv_image, [cnt], -1, (0, 255, 0), 2)
@@ -72,13 +83,24 @@ class ObjectDetector:
             cv2.imshow("Image Window", cv_image)
             cv2.waitKey(3)
 
-def main():
+def main(args=None):
+    # Initialize the ROS2 Python client
+    rclpy.init(args=args)
+    
+    # Create the object detector node
+    object_detector = ObjectDetector()
+    
     try:
-        od = ObjectDetector()
-        rospy.spin()
+        # Spin the node to process callbacks
+        rclpy.spin(object_detector)
     except KeyboardInterrupt:
-        print("Shutting down")
-    cv2.destroyAllWindows()
+        # Handle shutdown gracefully
+        object_detector.get_logger().info("Shutting down object detector node.")
+    finally:
+        # Destroy the node and shut down ROS2
+        object_detector.destroy_node()
+        rclpy.shutdown()
+        cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     main()
