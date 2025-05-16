@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time
 import rospy
+import math
 from std_msgs.msg import String
 from sensor_msgs.msg import *
 from mavros_msgs.srv import *
@@ -76,6 +77,7 @@ def process_image(cv_image):
 set_point_pub = rospy.Publisher("/mavros/setpoint_position/local", PoseStamped, queue_size=10)
 rospy.Subscriber("/mavros/vision_pose/pose", PoseStamped, local_position_callback)
 #rospy.Subscriber('/camera_1', Image, image_callback)
+pub = rospy.Publisher('/mavros/setpoint_velocity/cmd_vel', TwistStamped, queue_size=10)
 
 def call_set_mode(mode, mode_ID):
     try:
@@ -86,12 +88,12 @@ def call_set_mode(mode, mode_ID):
         print('Service call failed: %s' % e)
 
 def pub_reset_gps():
-    for i in range (0,5):
-     try:
-         msg = GeoPointStamped()
-         reset_gps = rospy.Publisher("/mavros/global_position/set_gp_origin", GeoPointStamped, queue_size=10)
-         reset_gps.publish(msg)
-     except rospy.ServiceException as e:
+    msg = GeoPointStamped()
+    reset_gps = rospy.Publisher("/mavros/global_position/set_gp_origin", GeoPointStamped, queue_size=10)
+    for _ in range (0,5):
+        try:
+            reset_gps.publish(msg)
+        except rospy.ServiceException as e:
          print('Service call failed: %s' % e)
 
 # TODO change to call_set_mode
@@ -103,6 +105,14 @@ def setGuidedMode():
         isModeChanged = flightModeService(custom_mode='GUIDED') #return true or false
     except rospy.ServiceException as e:
         print("service set_mode call failed: %s. GUIDED Mode could not be set. Check that GPS is enabled" % e)
+
+def setGuidedNoGPSMode():
+    rospy.wait_for_service('/mavros/set_mode')
+    try:
+        flightModeService = rospy.ServiceProxy('/mavros/set_mode', mavros_msgs.srv.SetMode)
+        isModeChanged = flightModeService(custom_mode='GUIDED_NOGPS') #return true or false
+    except rospy.ServiceException as e:
+        print("service set_mode call failed: %s. GUIDED_NOGPS Mode could not be set. Check that GPS is enabled" % e)
 
 # TODO change to call_set_mode
 def setStabilizeMode():
@@ -122,13 +132,13 @@ def setLandMode():
         print("service land call failed: %s. The vehicle cannot land " % e)
 
 def setArm():
-    pub_reset_gps()
-    time.sleep(1)
+    # pub_reset_gps()
+    # time.sleep(1)
     rospy.wait_for_service('/mavros/cmd/arming')
     try:
         # TODO this is to verify why the drone is arming but not launching
-        rospy.set_param("/mavros/vision_pose/tf/listen", True)
-        pub_reset_gps()
+        # rospy.set_param("/mavros/vision_pose/tf/listen", True)
+        # pub_reset_gps()
 
         armService = rospy.ServiceProxy('/mavros/cmd/arming', mavros_msgs.srv.CommandBool)
         armService(True)
@@ -152,6 +162,54 @@ def setTakeoffMode():
     except rospy.ServiceException as e:
         print("Service takeoff call failed: %s" % e)
 
+def takeoff_guided_nogps(target_altitude_m=1.0, climb_speed=0.3):
+    rate = rospy.Rate(10)  # 10 Hz
+
+    twist = TwistStamped()
+    twist.twist.linear.x = 0.0
+    twist.twist.linear.y = 0.0
+    twist.twist.linear.z = -abs(climb_speed)  # subir
+    ### odometria de zed?
+    duration = target_altitude_m / climb_speed # se puede poner por 0.5 segundos
+    rospy.loginfo(f"Subiendo {target_altitude_m} metros a velocidad {climb_speed} m/s (duración: {duration} s)")
+    
+    start_time = rospy.Time.now()
+    while rospy.Time.now() - start_time < rospy.Duration(duration) and not rospy.is_shutdown():
+        twist.header.stamp = rospy.Time.now()
+        pub.publish(twist)
+        rate.sleep()
+
+    # Detener ascenso
+    twist.twist.linear.z = 0.0
+    twist.header.stamp = rospy.Time.now()
+    pub.publish(twist)
+
+    rospy.loginfo("Takeoff completado")
+
+def land_guided_nogps(land_time=5, descend_speed=0.3):
+    rate = rospy.Rate(10)  # 10 Hz
+
+    twist = TwistStamped()
+    twist.twist.linear.x = 0.0
+    twist.twist.linear.y = 0.0
+    twist.twist.linear.z = descend_speed  # +Z es bajar
+    
+    start_time = rospy.Time.now()
+    duration = rospy.Duration(land_time)  # bajar por 5 segundos
+
+    rospy.loginfo("Iniciando aterrizaje guiado sin GPS")
+    while rospy.Time.now() - start_time < duration and not rospy.is_shutdown():
+        twist.header.stamp = rospy.Time.now()
+        pub.publish(twist)
+        rate.sleep()
+
+    # Detener movimiento vertical
+    twist.twist.linear.z = 0.0
+    twist.header.stamp = rospy.Time.now()
+    pub.publish(twist)
+
+    rospy.loginfo("Aterrizaje completado")
+
 def globalPositionCallback(globalPositionCallback):
     global latitude
     global longitude
@@ -159,6 +217,42 @@ def globalPositionCallback(globalPositionCallback):
     longitude = globalPositionCallback.longitude
     #print ("longitude: %.7f" %longitude)
     #print ("latitude: %.7f" %latitude)
+
+def move_xyz(dx=0.0, dy=0.0, dz=0.0, speed=0.5):
+    rate = rospy.Rate(10)  # 10 Hz
+
+     # Calcular distancia total (módulo del vector)
+    distance = math.sqrt(dx**2 + dy**2 + dz**2)
+    if distance == 0:
+        rospy.logwarn("No se indicó distancia a mover.")
+        return
+
+    duration = distance / speed
+    start_time = time.time()
+
+    # Calcular velocidades proporcionales en cada eje para mantener dirección
+    vx = (dx / distance) * speed
+    vy = (dy / distance) * speed
+    vz = (dz / distance) * speed
+
+    move_cmd = Twist()
+    move_cmd.linear.x = vx
+    move_cmd.linear.y = vy
+    move_cmd.linear.z = vz
+    move_cmd.angular.x = 0
+    move_cmd.angular.y = 0
+    move_cmd.angular.z = 0
+
+    rospy.loginfo(f"Moviendo: dx={dx} m, dy={dy} m, dz={dz} m a velocidad {speed} m/s durante {duration:.2f} s")
+
+    while time.time() - start_time < duration and not rospy.is_shutdown():
+        pub.publish(move_cmd)
+        rate.sleep()
+
+    # Detener el dron
+    stop_cmd = Twist()
+    pub.publish(stop_cmd)
+    rospy.loginfo("Movimiento completado y detenido.")
 
 def set_target_position(what, x,y,z=0.0,w=0.0):
     global pose
@@ -258,19 +352,20 @@ def string_to_pose(input_string):
 
 def go_to_destination(dest = "1.0, 0.0, 1.0, 0.0"):        
     x, y, z, w = dest.split(",")
-    setGuidedMode()
-    time.sleep(1)
-    pub_reset_gps()
-    time.sleep(1)
     rospy.set_param("/mavros/vision_pose/tf/listen", True)
+    setGuidedNoGPSMode()
+    # time.sleep(1)
+    #pub_reset_gps()
+    # time.sleep(1)
     time.sleep(5)
     setArm()
     time.sleep(1)
-    setTakeoffMode()
+    takeoff_guided_nogps()
     time.sleep(5)
-    set_target_position(x, y, z, w)
+    # set_target_position(x, y, z, w)
+    move_xyz(x, y, z, w)
     time.sleep(1)
-    setTakeoffMode()
+    land_guided_nogps()
     time.sleep(1)
     setDisarm()
 
